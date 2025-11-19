@@ -1,3 +1,5 @@
+// Detectar si estamos en la versión pública (GitHub Pages)
+const IS_PUBLIC = window.location.hostname.includes("github.io");
 /* ================= CONFIG GLOBAL CHART.JS ================= */
 if (typeof Chart !== "undefined") {
   Chart.defaults.font.family =
@@ -632,34 +634,54 @@ function setupTabs() {
 function setupEditMode() {
   editPanels = document.querySelectorAll(".edit-panel");
   const toggleBtn = document.getElementById("toggleEdit");
-  if (!toggleBtn) return;
-
-  toggleBtn.addEventListener("click", () => {
-    editMode = !editMode;
-    toggleBtn.textContent = editMode ? "Desactivar" : "Activar";
-    applyEditMode();
-  });
+if (toggleBtn) {
+  if (IS_PUBLIC) {
+    // En la versión pública ocultamos toda la barra de administración
+    const bar = toggleBtn.closest(".admin-bar");
+    if (bar) bar.style.display = "none";
+  } else {
+    // Solo en local (Live Server / desarrollo) permitimos editar
+    toggleBtn.addEventListener("click", () => {
+      editMode = !editMode;
+      toggleBtn.textContent = editMode ? "Desactivar" : "Activar";
+      applyEditMode();
+    });
+  }
 }
 
+
 /* ================= INIT PAGE ================= */
+function initAll() {
+  loadGeneral();
+  loadEducativo();
+  loadEconomico();
+  loadMujeres();
+  loadSocial();
+  loadEco2();
+  loadAfro();
+  loadCom();
+  loadTerr();
 
-function initPage() {
-  setupTabs();
-  setupEditMode();
-  setupGeneralPhoto();
   loadGeneralPhoto();
-
   loadEditableFromStorage();
   bindEditableInputs();
   applyEditMode();
 
   loadConsejeroPhotos();
   bindConsejeroPhotoInputs();
-
-  loadPanel("general"); // solo se cargan las demás cuando se abre su pestaña
-
-  setupSaveGeneral();
-  setupChartRefresh();
 }
 
+// Ajustes especiales para la versión pública (GitHub Pages)
+if (IS_PUBLIC) {
+  // Aseguramos que NO haya modo edición
+  editMode = false;
+  applyEditMode();
+
+  // Ocultamos botones de subir fotos (CNP + consejeros)
+  document.querySelectorAll(".upload-actions, .btn-photo").forEach((el) => {
+    el.style.display = "none";
+  });
+}
+
+initAll();
 document.addEventListener("DOMContentLoaded", initPage);
